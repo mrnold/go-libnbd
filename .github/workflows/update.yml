@@ -17,13 +17,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install libxml2-utils
 
-      - name: Find libnbd download directories
+      - name: Update libnbd bindings from libguestfs.org releases
         run: |
           #!/usr/bin/env bash
           RELEASES=$(curl --silent https://download.libguestfs.org/libnbd/ | xmllint --html --noblanks --xpath "/html/body/table/tr[td/img/@alt = '[DIR]']/td[a/.]/a/text()" -)
 
           git config --global user.email "marnold@redhat.com"
-          git config --gloabl user.name "Matthew Arnold"
+          git config --global user.name "Matthew Arnold"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           for release in ${RELEASES}
           do
