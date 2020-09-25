@@ -46,7 +46,7 @@ jobs:
               tag=v$major.$minor.$build
               echo Branch: $release Tar: $tarball Tag: $tag
 
-              if git rev-parse --verify origin/$release
+              if git rev-parse --verify $release
               then
                 echo Checking out existing branch: $release
                 git checkout $release
