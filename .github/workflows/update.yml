@@ -25,7 +25,7 @@ jobs:
           git config --global user.email "marnold@redhat.com"
           git config --global user.name "Matthew Arnold"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git pull --all
+          git fetch --all
           for release in ${RELEASES}
           do
             release=${release%?}
@@ -48,6 +48,7 @@ jobs:
               then
                 echo Checking out existing branch: $release
                 git checkout $release
+                git pull origin $release
               else
                 echo Creating new branch: $release
                 root=$(git rev-list --max-parents=0 HEAD)
