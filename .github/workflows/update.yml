@@ -71,5 +71,5 @@ jobs:
               echo
             done
           done
-          git push --all
+          git push --all -u
           git push --tags
