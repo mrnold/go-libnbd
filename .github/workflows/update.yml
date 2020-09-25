@@ -50,9 +50,8 @@ jobs:
                 git checkout $release
               else
                 echo Creating new branch: $release
-                root=$(git rev-list --all | tail -n 1)
-                git checkout $root
-                git checkout -b $release --track
+                git checkout init
+                git checkout -b $release
               fi
 
               if git rev-parse --verify $tag
