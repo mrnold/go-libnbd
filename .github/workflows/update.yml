@@ -27,7 +27,7 @@ jobs:
           git config --global user.email "marnold@redhat.com"
           git config --global user.name "Matthew Arnold"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git fetch --all --set-upstream
+          git pull --all --set-upstream
           for release in ${RELEASES}
           do
             release=${release%?}
