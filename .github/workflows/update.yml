@@ -39,7 +39,8 @@ jobs:
                 echo
                 continue
               fi
-              tag=$major.$minor.$build
+              version=$major.$minor.$build
+              tag=v$major.$minor.$build
               echo Branch: $release Tar: $tarball Tag: $tag
 
               if git rev-parse --verify $release
@@ -57,11 +58,11 @@ jobs:
               then
                 echo Already present in repository: $tag
               else
-                echo Updating $release branch with new version $tag
-                curl --silent https://download.libguestfs.org/libnbd/$release/$tarball | tar -xzv --strip-components=5 libnbd-$tag/golang/src/libguestfs.org/libnbd/
+                echo Updating $release branch with new version $version
+                curl --silent https://download.libguestfs.org/libnbd/$release/$tarball | tar -xzv --strip-components=5 libnbd-$version/golang/src/libguestfs.org/libnbd/
                 rm -f .gitignore
                 git add --all
-                git diff-index --quiet HEAD || git commit -m "Import libnbd-$tag"
+                git diff-index --quiet HEAD || git commit -m "Import libnbd-$version"
                 git tag $tag
               fi
               echo
