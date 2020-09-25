@@ -60,8 +60,8 @@ jobs:
                 echo Updating $release branch with new version $tag
                 curl --silent https://download.libguestfs.org/libnbd/$release/$tarball | tar -xzv --strip-components=5 libnbd-$tag/golang/src/libguestfs.org/libnbd/
                 rm -f .gitignore
-                git add .
-                git commit -m "Import libnbd-$tag"
+                git add --all
+                git diff-index --quiet HEAD || git commit -m "Import libnbd-$tag"
                 git tag $tag
               fi
               echo
