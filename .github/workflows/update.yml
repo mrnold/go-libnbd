@@ -46,21 +46,21 @@ jobs:
               tag=v$major.$minor.$build
               echo Branch: $release Tar: $tarball Tag: $tag
 
-              if git rev-parse --verify $release
-              then
-                echo Checking out existing branch: $release
-                git checkout $release
-              else
-                echo Creating new branch: $release
-                root=$(git rev-list --max-parents=0 HEAD)
-                git checkout $root
-                git checkout -b $release
-              fi
-
               if git rev-parse --verify $tag
               then
                 echo Already present in repository: $tag
               else
+                if ! (git rev-parse --verify $release || git rev-parse --verify origin/$release)
+                then
+                  echo Creating new branch: $release
+                  root=$(git rev-list --max-parents=0 HEAD)
+                  git checkout $root
+                  git checkout -b $release
+                else
+                  echo Checking out existing branch: $release
+                  git checkout $release
+                fi
+
                 echo Updating $release branch with new version $version
                 curl --silent https://download.libguestfs.org/libnbd/$release/$tarball | tar -xzv --strip-components=5 libnbd-$version/golang/src/libguestfs.org/libnbd/
                 rm -f .gitignore
