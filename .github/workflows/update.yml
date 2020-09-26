@@ -67,6 +67,10 @@ jobs:
                 git add --all
                 git diff-index --quiet HEAD || git commit -m "Import libnbd-$version"
                 git tag $tag
+                find . -type f -name '*.go' -exec sed -i 's/#cgo pkg-config: libnbd/#cgo LDFLAGS: -lnbd/g' {} +
+                git add --all
+                git diff-index --quiet HEAD || git commit -m "Tweak libnbd-$version for CDI build"
+                git tag $tag-cdi
               fi
               echo
               echo
