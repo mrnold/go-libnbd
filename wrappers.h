@@ -121,6 +121,8 @@ int _nbd_get_nr_list_exports_wrapper (struct error *err,
         struct nbd_handle *h);
 char * _nbd_get_list_export_name_wrapper (struct error *err,
         struct nbd_handle *h, int i);
+char * _nbd_get_list_export_description_wrapper (struct error *err,
+        struct nbd_handle *h, int i);
 int _nbd_add_meta_context_wrapper (struct error *err,
         struct nbd_handle *h, const char *name);
 int _nbd_set_uri_allow_transports_wrapper (struct error *err,
@@ -169,6 +171,8 @@ const char * _nbd_get_protocol_wrapper (struct error *err,
         struct nbd_handle *h);
 int64_t _nbd_get_size_wrapper (struct error *err,
         struct nbd_handle *h);
+int64_t _nbd_get_block_size_wrapper (struct error *err,
+        struct nbd_handle *h, int size_type);
 int _nbd_pread_wrapper (struct error *err,
         struct nbd_handle *h, void *buf, size_t count, uint64_t offset,
         uint32_t flags);

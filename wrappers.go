@@ -472,6 +472,23 @@ _nbd_get_list_export_name_wrapper (struct error *err,
 #endif
 }
 
+char *
+_nbd_get_list_export_description_wrapper (struct error *err,
+        struct nbd_handle *h, int i)
+{
+#ifdef LIBNBD_HAVE_NBD_GET_LIST_EXPORT_DESCRIPTION
+  char * ret;
+
+  ret = nbd_get_list_export_description (h, i);
+  if (ret == NULL)
+    save_error (err);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_GET_LIST_EXPORT_DESCRIPTION
+  missing_function (err, "get_list_export_description");
+  return NULL;
+#endif
+}
+
 int
 _nbd_add_meta_context_wrapper (struct error *err,
         struct nbd_handle *h, const char *name)
@@ -876,6 +893,23 @@ _nbd_get_size_wrapper (struct error *err,
   return ret;
 #else // !LIBNBD_HAVE_NBD_GET_SIZE
   missing_function (err, "get_size");
+  return -1;
+#endif
+}
+
+int64_t
+_nbd_get_block_size_wrapper (struct error *err,
+        struct nbd_handle *h, int size_type)
+{
+#ifdef LIBNBD_HAVE_NBD_GET_BLOCK_SIZE
+  int64_t ret;
+
+  ret = nbd_get_block_size (h, size_type);
+  if (ret == -1)
+    save_error (err);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_GET_BLOCK_SIZE
+  missing_function (err, "get_block_size");
   return -1;
 #endif
 }
