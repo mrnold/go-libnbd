@@ -253,6 +253,84 @@ func (h *Libnbd) GetExportName () (*string, error) {
     return &r, nil
 }
 
+/* SetFullInfo: control whether NBD_OPT_GO requests extra details */
+func (h *Libnbd) SetFullInfo (request bool) error {
+    if h.h == nil {
+        return closed_handle_error ("set_full_info")
+    }
+
+    var c_err C.struct_error
+    c_request := C.bool (request)
+
+    ret := C._nbd_set_full_info_wrapper (&c_err, h.h, c_request)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("set_full_info", c_err)
+        C.free_error (&c_err)
+        return err
+    }
+    return nil
+}
+
+/* GetFullInfo: see if NBD_OPT_GO requests extra details */
+func (h *Libnbd) GetFullInfo () (bool, error) {
+    if h.h == nil {
+        return false, closed_handle_error ("get_full_info")
+    }
+
+    var c_err C.struct_error
+
+    ret := C._nbd_get_full_info_wrapper (&c_err, h.h)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("get_full_info", c_err)
+        C.free_error (&c_err)
+        return false, err
+    }
+    r := int (ret)
+    if r != 0 { return true, nil } else { return false, nil }
+}
+
+/* GetCanonicalExportName: return the canonical export name, if the server has one */
+func (h *Libnbd) GetCanonicalExportName () (*string, error) {
+    if h.h == nil {
+        return nil, closed_handle_error ("get_canonical_export_name")
+    }
+
+    var c_err C.struct_error
+
+    ret := C._nbd_get_canonical_export_name_wrapper (&c_err, h.h)
+    runtime.KeepAlive (h.h)
+    if ret == nil {
+        err := get_error ("get_canonical_export_name", c_err)
+        C.free_error (&c_err)
+        return nil, err
+    }
+    r := C.GoString (ret)
+    C.free (unsafe.Pointer (ret))
+    return &r, nil
+}
+
+/* GetExportDescription: return the export description, if the server has one */
+func (h *Libnbd) GetExportDescription () (*string, error) {
+    if h.h == nil {
+        return nil, closed_handle_error ("get_export_description")
+    }
+
+    var c_err C.struct_error
+
+    ret := C._nbd_get_export_description_wrapper (&c_err, h.h)
+    runtime.KeepAlive (h.h)
+    if ret == nil {
+        err := get_error ("get_export_description", c_err)
+        C.free_error (&c_err)
+        return nil, err
+    }
+    r := C.GoString (ret)
+    C.free (unsafe.Pointer (ret))
+    return &r, nil
+}
+
 /* SetTls: enable or require TLS (authentication and encryption) */
 func (h *Libnbd) SetTls (tls Tls) error {
     if h.h == nil {
@@ -516,37 +594,37 @@ func (h *Libnbd) GetHandshakeFlags () (uint, error) {
     return uint (ret), nil
 }
 
-/* SetListExports: set whether to list server exports */
-func (h *Libnbd) SetListExports (list bool) error {
+/* SetOptMode: control option mode, for pausing during option negotiation */
+func (h *Libnbd) SetOptMode (enable bool) error {
     if h.h == nil {
-        return closed_handle_error ("set_list_exports")
+        return closed_handle_error ("set_opt_mode")
     }
 
     var c_err C.struct_error
-    c_list := C.bool (list)
+    c_enable := C.bool (enable)
 
-    ret := C._nbd_set_list_exports_wrapper (&c_err, h.h, c_list)
+    ret := C._nbd_set_opt_mode_wrapper (&c_err, h.h, c_enable)
     runtime.KeepAlive (h.h)
     if ret == -1 {
-        err := get_error ("set_list_exports", c_err)
+        err := get_error ("set_opt_mode", c_err)
         C.free_error (&c_err)
         return err
     }
     return nil
 }
 
-/* GetListExports: return whether list exports mode was enabled */
-func (h *Libnbd) GetListExports () (bool, error) {
+/* GetOptMode: return whether option mode was enabled */
+func (h *Libnbd) GetOptMode () (bool, error) {
     if h.h == nil {
-        return false, closed_handle_error ("get_list_exports")
+        return false, closed_handle_error ("get_opt_mode")
     }
 
     var c_err C.struct_error
 
-    ret := C._nbd_get_list_exports_wrapper (&c_err, h.h)
+    ret := C._nbd_get_opt_mode_wrapper (&c_err, h.h)
     runtime.KeepAlive (h.h)
     if ret == -1 {
-        err := get_error ("get_list_exports", c_err)
+        err := get_error ("get_opt_mode", c_err)
         C.free_error (&c_err)
         return false, err
     }
@@ -554,64 +632,80 @@ func (h *Libnbd) GetListExports () (bool, error) {
     if r != 0 { return true, nil } else { return false, nil }
 }
 
-/* GetNrListExports: return the number of exports returned by the server */
-func (h *Libnbd) GetNrListExports () (uint, error) {
+/* OptGo: end negotiation and move on to using an export */
+func (h *Libnbd) OptGo () error {
     if h.h == nil {
-        return 0, closed_handle_error ("get_nr_list_exports")
+        return closed_handle_error ("opt_go")
     }
 
     var c_err C.struct_error
 
-    ret := C._nbd_get_nr_list_exports_wrapper (&c_err, h.h)
+    ret := C._nbd_opt_go_wrapper (&c_err, h.h)
     runtime.KeepAlive (h.h)
     if ret == -1 {
-        err := get_error ("get_nr_list_exports", c_err)
+        err := get_error ("opt_go", c_err)
+        C.free_error (&c_err)
+        return err
+    }
+    return nil
+}
+
+/* OptAbort: end negotiation and close the connection */
+func (h *Libnbd) OptAbort () error {
+    if h.h == nil {
+        return closed_handle_error ("opt_abort")
+    }
+
+    var c_err C.struct_error
+
+    ret := C._nbd_opt_abort_wrapper (&c_err, h.h)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("opt_abort", c_err)
+        C.free_error (&c_err)
+        return err
+    }
+    return nil
+}
+
+/* OptList: request the server to list all exports during negotiation */
+func (h *Libnbd) OptList (list ListCallback) (uint, error) {
+    if h.h == nil {
+        return 0, closed_handle_error ("opt_list")
+    }
+
+    var c_err C.struct_error
+    var c_list C.nbd_list_callback
+    c_list.callback = (*[0]byte)(C._nbd_list_callback_wrapper)
+    c_list.free = (*[0]byte)(C._nbd_list_callback_free)
+    c_list.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (list))))
+
+    ret := C._nbd_opt_list_wrapper (&c_err, h.h, c_list)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("opt_list", c_err)
         C.free_error (&c_err)
         return 0, err
     }
     return uint (ret), nil
 }
 
-/* GetListExportName: return the i'th export name */
-func (h *Libnbd) GetListExportName (i int) (*string, error) {
+/* OptInfo: request the server for information about an export */
+func (h *Libnbd) OptInfo () error {
     if h.h == nil {
-        return nil, closed_handle_error ("get_list_export_name")
+        return closed_handle_error ("opt_info")
     }
 
     var c_err C.struct_error
-    c_i := C.int (i)
 
-    ret := C._nbd_get_list_export_name_wrapper (&c_err, h.h, c_i)
+    ret := C._nbd_opt_info_wrapper (&c_err, h.h)
     runtime.KeepAlive (h.h)
-    if ret == nil {
-        err := get_error ("get_list_export_name", c_err)
+    if ret == -1 {
+        err := get_error ("opt_info", c_err)
         C.free_error (&c_err)
-        return nil, err
+        return err
     }
-    r := C.GoString (ret)
-    C.free (unsafe.Pointer (ret))
-    return &r, nil
-}
-
-/* GetListExportDescription: return the i'th export description */
-func (h *Libnbd) GetListExportDescription (i int) (*string, error) {
-    if h.h == nil {
-        return nil, closed_handle_error ("get_list_export_description")
-    }
-
-    var c_err C.struct_error
-    c_i := C.int (i)
-
-    ret := C._nbd_get_list_export_description_wrapper (&c_err, h.h, c_i)
-    runtime.KeepAlive (h.h)
-    if ret == nil {
-        err := get_error ("get_list_export_description", c_err)
-        C.free_error (&c_err)
-        return nil, err
-    }
-    r := C.GoString (ret)
-    C.free (unsafe.Pointer (ret))
-    return &r, nil
+    return nil
 }
 
 /* AddMetaContext: ask server to negotiate metadata context */
@@ -1585,6 +1679,127 @@ func (h *Libnbd) AioConnectSystemdSocketActivation (argv []string) error {
     return nil
 }
 
+/* Struct carrying optional arguments for AioOptGo. */
+type AioOptGoOptargs struct {
+  /* CompletionCallback field is ignored unless CompletionCallbackSet == true. */
+  CompletionCallbackSet bool
+  CompletionCallback CompletionCallback
+}
+
+/* AioOptGo: end negotiation and move on to using an export */
+func (h *Libnbd) AioOptGo (optargs *AioOptGoOptargs) error {
+    if h.h == nil {
+        return closed_handle_error ("aio_opt_go")
+    }
+
+    var c_err C.struct_error
+    var c_completion C.nbd_completion_callback
+    if optargs != nil {
+        if optargs.CompletionCallbackSet {
+            c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
+            c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
+            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+        }
+    }
+
+    ret := C._nbd_aio_opt_go_wrapper (&c_err, h.h, c_completion)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("aio_opt_go", c_err)
+        C.free_error (&c_err)
+        return err
+    }
+    return nil
+}
+
+/* AioOptAbort: end negotiation and close the connection */
+func (h *Libnbd) AioOptAbort () error {
+    if h.h == nil {
+        return closed_handle_error ("aio_opt_abort")
+    }
+
+    var c_err C.struct_error
+
+    ret := C._nbd_aio_opt_abort_wrapper (&c_err, h.h)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("aio_opt_abort", c_err)
+        C.free_error (&c_err)
+        return err
+    }
+    return nil
+}
+
+/* Struct carrying optional arguments for AioOptList. */
+type AioOptListOptargs struct {
+  /* CompletionCallback field is ignored unless CompletionCallbackSet == true. */
+  CompletionCallbackSet bool
+  CompletionCallback CompletionCallback
+}
+
+/* AioOptList: request the server to list all exports during negotiation */
+func (h *Libnbd) AioOptList (list ListCallback, optargs *AioOptListOptargs) error {
+    if h.h == nil {
+        return closed_handle_error ("aio_opt_list")
+    }
+
+    var c_err C.struct_error
+    var c_list C.nbd_list_callback
+    c_list.callback = (*[0]byte)(C._nbd_list_callback_wrapper)
+    c_list.free = (*[0]byte)(C._nbd_list_callback_free)
+    c_list.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (list))))
+    var c_completion C.nbd_completion_callback
+    if optargs != nil {
+        if optargs.CompletionCallbackSet {
+            c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
+            c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
+            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+        }
+    }
+
+    ret := C._nbd_aio_opt_list_wrapper (&c_err, h.h, c_list, c_completion)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("aio_opt_list", c_err)
+        C.free_error (&c_err)
+        return err
+    }
+    return nil
+}
+
+/* Struct carrying optional arguments for AioOptInfo. */
+type AioOptInfoOptargs struct {
+  /* CompletionCallback field is ignored unless CompletionCallbackSet == true. */
+  CompletionCallbackSet bool
+  CompletionCallback CompletionCallback
+}
+
+/* AioOptInfo: request the server for information about an export */
+func (h *Libnbd) AioOptInfo (optargs *AioOptInfoOptargs) error {
+    if h.h == nil {
+        return closed_handle_error ("aio_opt_info")
+    }
+
+    var c_err C.struct_error
+    var c_completion C.nbd_completion_callback
+    if optargs != nil {
+        if optargs.CompletionCallbackSet {
+            c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
+            c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
+            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+        }
+    }
+
+    ret := C._nbd_aio_opt_info_wrapper (&c_err, h.h, c_completion)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("aio_opt_info", c_err)
+        C.free_error (&c_err)
+        return err
+    }
+    return nil
+}
+
 /* Struct carrying optional arguments for AioPread. */
 type AioPreadOptargs struct {
   /* CompletionCallback field is ignored unless CompletionCallbackSet == true. */
@@ -2059,6 +2274,25 @@ func (h *Libnbd) AioIsConnecting () (bool, error) {
     runtime.KeepAlive (h.h)
     if ret == -1 {
         err := get_error ("aio_is_connecting", c_err)
+        C.free_error (&c_err)
+        return false, err
+    }
+    r := int (ret)
+    if r != 0 { return true, nil } else { return false, nil }
+}
+
+/* AioIsNegotiating: check if connection is ready to send handshake option */
+func (h *Libnbd) AioIsNegotiating () (bool, error) {
+    if h.h == nil {
+        return false, closed_handle_error ("aio_is_negotiating")
+    }
+
+    var c_err C.struct_error
+
+    ret := C._nbd_aio_is_negotiating_wrapper (&c_err, h.h)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("aio_is_negotiating", c_err)
         C.free_error (&c_err)
         return false, err
     }
