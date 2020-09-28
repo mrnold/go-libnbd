@@ -93,5 +93,9 @@ jobs:
               echo
             done
           done
+          latest=$(tail -n 1 <<< $release)
+          git checkout main
+          git checkout $latest ./
+          git diff-index --quiet HEAD || git commit -m "Update latest libnbd bindings."
           git push --all -u
           git push --tags
