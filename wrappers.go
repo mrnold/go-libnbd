@@ -470,6 +470,37 @@ _nbd_get_handshake_flags_wrapper (struct error *err,
 }
 
 int
+_nbd_set_strict_mode_wrapper (struct error *err,
+        struct nbd_handle *h, uint32_t flags)
+{
+#ifdef LIBNBD_HAVE_NBD_SET_STRICT_MODE
+  int ret;
+
+  ret = nbd_set_strict_mode (h, flags);
+  if (ret == -1)
+    save_error (err);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_SET_STRICT_MODE
+  missing_function (err, "set_strict_mode");
+  return -1;
+#endif
+}
+
+uint32_t
+_nbd_get_strict_mode_wrapper (struct error *err,
+        struct nbd_handle *h)
+{
+#ifdef LIBNBD_HAVE_NBD_GET_STRICT_MODE
+  uint32_t ret;
+
+  ret = nbd_get_strict_mode (h);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_GET_STRICT_MODE
+  missing_function (err, "get_strict_mode");
+#endif
+}
+
+int
 _nbd_set_opt_mode_wrapper (struct error *err,
         struct nbd_handle *h, bool enable)
 {

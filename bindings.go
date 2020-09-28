@@ -61,24 +61,43 @@ const (
 /* Flags. */
 type CmdFlag uint32
 const (
-    CMD_FLAG_FUA = CmdFlag(1)
-    CMD_FLAG_NO_HOLE = CmdFlag(2)
-    CMD_FLAG_DF = CmdFlag(4)
-    CMD_FLAG_REQ_ONE = CmdFlag(8)
-    CMD_FLAG_FAST_ZERO = CmdFlag(16)
+    CMD_FLAG_FUA = CmdFlag(0x01)
+    CMD_FLAG_NO_HOLE = CmdFlag(0x02)
+    CMD_FLAG_DF = CmdFlag(0x04)
+    CMD_FLAG_REQ_ONE = CmdFlag(0x08)
+    CMD_FLAG_FAST_ZERO = CmdFlag(0x10)
+    CMD_FLAG_MASK = CmdFlag(0x1f)
 )
 
 type HandshakeFlag uint32
 const (
-    HANDSHAKE_FLAG_FIXED_NEWSTYLE = HandshakeFlag(1)
-    HANDSHAKE_FLAG_NO_ZEROES = HandshakeFlag(2)
+    HANDSHAKE_FLAG_FIXED_NEWSTYLE = HandshakeFlag(0x01)
+    HANDSHAKE_FLAG_NO_ZEROES = HandshakeFlag(0x02)
+    HANDSHAKE_FLAG_MASK = HandshakeFlag(0x03)
+)
+
+type Strict uint32
+const (
+    STRICT_COMMANDS = Strict(0x01)
+    STRICT_FLAGS = Strict(0x02)
+    STRICT_BOUNDS = Strict(0x04)
+    STRICT_ZERO_SIZE = Strict(0x08)
+    STRICT_ALIGN = Strict(0x10)
+    STRICT_MASK = Strict(0x1f)
 )
 
 type AllowTransport uint32
 const (
-    ALLOW_TRANSPORT_TCP = AllowTransport(1)
-    ALLOW_TRANSPORT_UNIX = AllowTransport(2)
-    ALLOW_TRANSPORT_VSOCK = AllowTransport(4)
+    ALLOW_TRANSPORT_TCP = AllowTransport(0x01)
+    ALLOW_TRANSPORT_UNIX = AllowTransport(0x02)
+    ALLOW_TRANSPORT_VSOCK = AllowTransport(0x04)
+    ALLOW_TRANSPORT_MASK = AllowTransport(0x07)
+)
+
+type Shutdown uint32
+const (
+    SHUTDOWN_ABANDON_PENDING = Shutdown(0x10000)
+    SHUTDOWN_MASK = Shutdown(0x10000)
 )
 
 /* Constants. */
@@ -587,6 +606,38 @@ func (h *Libnbd) GetHandshakeFlags () (HandshakeFlag, error) {
     ret := C._nbd_get_handshake_flags_wrapper (&c_err, h.h)
     runtime.KeepAlive (h.h)
     return HandshakeFlag (ret), nil
+}
+
+/* SetStrictMode: control how strictly to follow NBD protocol */
+func (h *Libnbd) SetStrictMode (flags Strict) error {
+    if h.h == nil {
+        return closed_handle_error ("set_strict_mode")
+    }
+
+    var c_err C.struct_error
+    c_flags := C.uint32_t (flags)
+
+    ret := C._nbd_set_strict_mode_wrapper (&c_err, h.h, c_flags)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("set_strict_mode", c_err)
+        C.free_error (&c_err)
+        return err
+    }
+    return nil
+}
+
+/* GetStrictMode: see which strictness flags are in effect */
+func (h *Libnbd) GetStrictMode () (Strict, error) {
+    if h.h == nil {
+        return 0, closed_handle_error ("get_strict_mode")
+    }
+
+    var c_err C.struct_error
+
+    ret := C._nbd_get_strict_mode_wrapper (&c_err, h.h)
+    runtime.KeepAlive (h.h)
+    return Strict (ret), nil
 }
 
 /* SetOptMode: control option mode, for pausing during option negotiation */
@@ -1299,7 +1350,7 @@ func (h *Libnbd) Pwrite (buf []byte, offset uint64, optargs *PwriteOptargs) erro
 type ShutdownOptargs struct {
   /* Flags field is ignored unless FlagsSet == true. */
   FlagsSet bool
-  Flags CmdFlag
+  Flags Shutdown
 }
 
 /* Shutdown: disconnect from the NBD server */
