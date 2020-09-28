@@ -93,9 +93,21 @@ jobs:
               echo
             done
           done
+          
           latest=$(tail -n 1 <<< $release)
           git checkout main
-          git checkout origin/$latest ./
+          if git rev-parse --verify $release
+          then
+            echo Copy newest bindings from local $latest
+            git checkout $latest ./ 
+          elif git rev-parse --verify origin/$release
+          then    
+            echo Copy newest bindings from remote $latest
+            git checkout origin/$latest ./
+          else
+            echo Latest branch not present in local or remote? Check libguestfs.org for unpopulated directory.
+          fi
+
           git diff-index --quiet HEAD || git commit -m "Update latest libnbd bindings."
           git push --all -u
           git push --tags
