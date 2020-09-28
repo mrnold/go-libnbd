@@ -509,6 +509,83 @@ func (h *Libnbd) GetHandshakeFlags () (uint, error) {
     return uint (ret), nil
 }
 
+/* SetListExports: set whether to list server exports */
+func (h *Libnbd) SetListExports (list bool) error {
+    if h.h == nil {
+        return closed_handle_error ("set_list_exports")
+    }
+
+    var c_err C.struct_error
+    c_list := C.bool (list)
+
+    ret := C._nbd_set_list_exports_wrapper (&c_err, h.h, c_list)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("set_list_exports", c_err)
+        C.free_error (&c_err)
+        return err
+    }
+    return nil
+}
+
+/* GetListExports: return whether list exports mode was enabled */
+func (h *Libnbd) GetListExports () (bool, error) {
+    if h.h == nil {
+        return false, closed_handle_error ("get_list_exports")
+    }
+
+    var c_err C.struct_error
+
+    ret := C._nbd_get_list_exports_wrapper (&c_err, h.h)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("get_list_exports", c_err)
+        C.free_error (&c_err)
+        return false, err
+    }
+    r := int (ret)
+    if r != 0 { return true, nil } else { return false, nil }
+}
+
+/* GetNrListExports: return the number of exports returned by the server */
+func (h *Libnbd) GetNrListExports () (uint, error) {
+    if h.h == nil {
+        return 0, closed_handle_error ("get_nr_list_exports")
+    }
+
+    var c_err C.struct_error
+
+    ret := C._nbd_get_nr_list_exports_wrapper (&c_err, h.h)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("get_nr_list_exports", c_err)
+        C.free_error (&c_err)
+        return 0, err
+    }
+    return uint (ret), nil
+}
+
+/* GetListExportName: return the i'th export name */
+func (h *Libnbd) GetListExportName (i int) (*string, error) {
+    if h.h == nil {
+        return nil, closed_handle_error ("get_list_export_name")
+    }
+
+    var c_err C.struct_error
+    c_i := C.int (i)
+
+    ret := C._nbd_get_list_export_name_wrapper (&c_err, h.h, c_i)
+    runtime.KeepAlive (h.h)
+    if ret == nil {
+        err := get_error ("get_list_export_name", c_err)
+        C.free_error (&c_err)
+        return nil, err
+    }
+    r := C.GoString (ret)
+    C.free (unsafe.Pointer (ret))
+    return &r, nil
+}
+
 /* AddMetaContext: ask server to negotiate metadata context */
 func (h *Libnbd) AddMetaContext (name string) error {
     if h.h == nil {

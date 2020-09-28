@@ -405,6 +405,74 @@ _nbd_get_handshake_flags_wrapper (struct error *err,
 }
 
 int
+_nbd_set_list_exports_wrapper (struct error *err,
+        struct nbd_handle *h, bool list)
+{
+#ifdef LIBNBD_HAVE_NBD_SET_LIST_EXPORTS
+  int ret;
+
+  ret = nbd_set_list_exports (h, list);
+  if (ret == -1)
+    save_error (err);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_SET_LIST_EXPORTS
+  missing_function (err, "set_list_exports");
+  return -1;
+#endif
+}
+
+int
+_nbd_get_list_exports_wrapper (struct error *err,
+        struct nbd_handle *h)
+{
+#ifdef LIBNBD_HAVE_NBD_GET_LIST_EXPORTS
+  int ret;
+
+  ret = nbd_get_list_exports (h);
+  if (ret == -1)
+    save_error (err);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_GET_LIST_EXPORTS
+  missing_function (err, "get_list_exports");
+  return -1;
+#endif
+}
+
+int
+_nbd_get_nr_list_exports_wrapper (struct error *err,
+        struct nbd_handle *h)
+{
+#ifdef LIBNBD_HAVE_NBD_GET_NR_LIST_EXPORTS
+  int ret;
+
+  ret = nbd_get_nr_list_exports (h);
+  if (ret == -1)
+    save_error (err);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_GET_NR_LIST_EXPORTS
+  missing_function (err, "get_nr_list_exports");
+  return -1;
+#endif
+}
+
+char *
+_nbd_get_list_export_name_wrapper (struct error *err,
+        struct nbd_handle *h, int i)
+{
+#ifdef LIBNBD_HAVE_NBD_GET_LIST_EXPORT_NAME
+  char * ret;
+
+  ret = nbd_get_list_export_name (h, i);
+  if (ret == NULL)
+    save_error (err);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_GET_LIST_EXPORT_NAME
+  missing_function (err, "get_list_export_name");
+  return NULL;
+#endif
+}
+
+int
 _nbd_add_meta_context_wrapper (struct error *err,
         struct nbd_handle *h, const char *name)
 {
