@@ -60,18 +60,35 @@ jobs:
                   echo Checking out existing branch: $release
                   git checkout $release
                 fi
-
                 echo Updating $release branch with new version $version
                 curl --silent https://download.libguestfs.org/libnbd/$release/$tarball | tar -xzv --strip-components=5 libnbd-$version/golang/src/libguestfs.org/libnbd/
                 rm -f .gitignore
                 git add --all
                 git diff-index --quiet HEAD || git commit -m "Import libnbd-$version"
                 git tag $tag
+              fi
+
+              if git rev-parse --verify $tag-cdi
+              then
+                echo Already present in repository: $tag-cdi
+              else
+                if ! (git rev-parse --verify $release-cdi || git rev-parse --verify origin/$release-cdi)
+                then    
+                  echo Creating new branch: $release-cdi
+                  root=$(git rev-list --max-parents=0 HEAD)
+                  git checkout $root
+                  git checkout -b $release-cdi
+                else
+                  echo Checking out existing branch: $release-cdi
+                  git checkout $release-cdi
+                fi
+                git checkout $tag ./
                 find . -type f -name '*.go' -exec sed -i 's/#cgo pkg-config: libnbd/#cgo LDFLAGS: -lnbd/g' {} +
                 git add --all
                 git diff-index --quiet HEAD || git commit -m "Tweak libnbd-$version for CDI build"
                 git tag $tag-cdi
               fi
+
               echo
               echo
             done
