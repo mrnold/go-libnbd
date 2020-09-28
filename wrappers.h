@@ -113,6 +113,14 @@ int _nbd_set_handshake_flags_wrapper (struct error *err,
         struct nbd_handle *h, uint32_t flags);
 unsigned _nbd_get_handshake_flags_wrapper (struct error *err,
         struct nbd_handle *h);
+int _nbd_set_list_exports_wrapper (struct error *err,
+        struct nbd_handle *h, bool list);
+int _nbd_get_list_exports_wrapper (struct error *err,
+        struct nbd_handle *h);
+int _nbd_get_nr_list_exports_wrapper (struct error *err,
+        struct nbd_handle *h);
+char * _nbd_get_list_export_name_wrapper (struct error *err,
+        struct nbd_handle *h, int i);
 int _nbd_add_meta_context_wrapper (struct error *err,
         struct nbd_handle *h, const char *name);
 int _nbd_set_uri_allow_transports_wrapper (struct error *err,
