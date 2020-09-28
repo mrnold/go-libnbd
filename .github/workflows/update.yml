@@ -36,9 +36,9 @@ jobs:
             do
               IFS=\"$IFS read href tarball suffix <<< $tarball # Intentionally overwrite tarball
               IFS="-.$IFS" read libnbd major minor build suffix <<< $tarball
-              if (($major \* 100 + $minor \* 10 + $build \< 136))
+              if (($major \* 100000000 + $minor \* 10000 + $build \< 100030006))
               then # Go bindings added in 1.3.6
-                echo Ignoring release older than 1.3.6: $release
+                echo Ignoring release older than 1.3.6: $release/$tarball
                 echo
                 continue
               fi
