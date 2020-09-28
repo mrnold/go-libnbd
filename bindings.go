@@ -51,6 +51,13 @@ const (
     TLS_REQUIRE = Tls(2)
 )
 
+type Size int
+const (
+    SIZE_MINIMUM = Size(0)
+    SIZE_PREFERRED = Size(1)
+    SIZE_MAXIMUM = Size(2)
+)
+
 /* Flags. */
 type CmdFlag uint32
 const (
@@ -586,6 +593,27 @@ func (h *Libnbd) GetListExportName (i int) (*string, error) {
     return &r, nil
 }
 
+/* GetListExportDescription: return the i'th export description */
+func (h *Libnbd) GetListExportDescription (i int) (*string, error) {
+    if h.h == nil {
+        return nil, closed_handle_error ("get_list_export_description")
+    }
+
+    var c_err C.struct_error
+    c_i := C.int (i)
+
+    ret := C._nbd_get_list_export_description_wrapper (&c_err, h.h, c_i)
+    runtime.KeepAlive (h.h)
+    if ret == nil {
+        err := get_error ("get_list_export_description", c_err)
+        C.free_error (&c_err)
+        return nil, err
+    }
+    r := C.GoString (ret)
+    C.free (unsafe.Pointer (ret))
+    return &r, nil
+}
+
 /* AddMetaContext: ask server to negotiate metadata context */
 func (h *Libnbd) AddMetaContext (name string) error {
     if h.h == nil {
@@ -1047,6 +1075,25 @@ func (h *Libnbd) GetSize () (uint64, error) {
     runtime.KeepAlive (h.h)
     if ret == -1 {
         err := get_error ("get_size", c_err)
+        C.free_error (&c_err)
+        return 0, err
+    }
+    return uint64 (ret), nil
+}
+
+/* GetBlockSize: return a specific server block size constraint */
+func (h *Libnbd) GetBlockSize (size_type Size) (uint64, error) {
+    if h.h == nil {
+        return 0, closed_handle_error ("get_block_size")
+    }
+
+    var c_err C.struct_error
+    c_size_type := C.int (size_type)
+
+    ret := C._nbd_get_block_size_wrapper (&c_err, h.h, c_size_type)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("get_block_size", c_err)
         C.free_error (&c_err)
         return 0, err
     }
