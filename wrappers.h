@@ -3,7 +3,7 @@
  * generator/generator
  * ANY CHANGES YOU MAKE TO THIS FILE WILL BE LOST.
  *
- * Copyright (C) 2013-2019 Red Hat Inc.
+ * Copyright (C) 2013-2020 Red Hat Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,9 @@
 #ifndef LIBNBD_GOLANG_WRAPPERS_H
 #define LIBNBD_GOLANG_WRAPPERS_H
 
+#include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "libnbd.h"
 
@@ -33,6 +35,10 @@
  */
 static inline void *long_to_vp (long i) { return (void *)(intptr_t)i; }
 
+/* save_error is called from the same thread to make a copy
+ * of the error which can later be retrieve from golang code
+ * possibly running in a different thread.
+ */
 struct error {
   char *error;
   int errnum;
@@ -49,6 +55,18 @@ static inline void
 free_error (struct error *err)
 {
   free (err->error);
+}
+
+/* If you mix old C library and new bindings then some C
+ * functions may not be defined.  They return ENOTSUP.
+ */
+static inline void
+missing_function (struct error *err, const char *fn)
+{
+  asprintf (&err->error, "%s: "
+            "function missing because golang bindings were compiled "
+            "against an old version of the C library", fn);
+  err->errnum = ENOTSUP;
 }
 
 int _nbd_set_debug_wrapper (struct error *err,

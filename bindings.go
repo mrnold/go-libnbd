@@ -3,7 +3,7 @@
  * generator/generator
  * ANY CHANGES YOU MAKE TO THIS FILE WILL BE LOST.
  *
- * Copyright (C) 2013-2019 Red Hat Inc.
+ * Copyright (C) 2013-2020 Red Hat Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,8 +24,7 @@ package libnbd
 
 /*
 #cgo pkg-config: libnbd
-
-#include <config.h>
+#cgo CFLAGS: -D_GNU_SOURCE=1
 
 #include <stdio.h>
 #include <stdlib.h>
