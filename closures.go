@@ -116,3 +116,16 @@ func list_callback (callbackid C.long, name *C.char, description *C.char) C.int 
     return C.int (ret);
 }
 
+type ContextCallback func (name string) int
+
+//export context_callback
+func context_callback (callbackid C.long, name *C.char) C.int {
+    callbackFunc := getCallbackId (int (callbackid));
+    callback, ok := callbackFunc.(ContextCallback);
+    if !ok {
+        panic ("inappropriate callback type");
+    }
+    ret := callback (C.GoString (name))
+    return C.int (ret);
+}
+
