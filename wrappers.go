@@ -603,6 +603,23 @@ _nbd_opt_info_wrapper (struct error *err,
 }
 
 int
+_nbd_opt_list_meta_context_wrapper (struct error *err,
+        struct nbd_handle *h, nbd_context_callback context_callback)
+{
+#ifdef LIBNBD_HAVE_NBD_OPT_LIST_META_CONTEXT
+  int ret;
+
+  ret = nbd_opt_list_meta_context (h, context_callback);
+  if (ret == -1)
+    save_error (err);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_OPT_LIST_META_CONTEXT
+  missing_function (err, "opt_list_meta_context");
+  return -1;
+#endif
+}
+
+int
 _nbd_add_meta_context_wrapper (struct error *err,
         struct nbd_handle *h, const char *name)
 {
@@ -615,6 +632,57 @@ _nbd_add_meta_context_wrapper (struct error *err,
   return ret;
 #else // !LIBNBD_HAVE_NBD_ADD_META_CONTEXT
   missing_function (err, "add_meta_context");
+  return -1;
+#endif
+}
+
+ssize_t
+_nbd_get_nr_meta_contexts_wrapper (struct error *err,
+        struct nbd_handle *h)
+{
+#ifdef LIBNBD_HAVE_NBD_GET_NR_META_CONTEXTS
+  ssize_t ret;
+
+  ret = nbd_get_nr_meta_contexts (h);
+  if (ret == -1)
+    save_error (err);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_GET_NR_META_CONTEXTS
+  missing_function (err, "get_nr_meta_contexts");
+  return -1;
+#endif
+}
+
+char *
+_nbd_get_meta_context_wrapper (struct error *err,
+        struct nbd_handle *h, size_t i)
+{
+#ifdef LIBNBD_HAVE_NBD_GET_META_CONTEXT
+  char * ret;
+
+  ret = nbd_get_meta_context (h, i);
+  if (ret == NULL)
+    save_error (err);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_GET_META_CONTEXT
+  missing_function (err, "get_meta_context");
+  return NULL;
+#endif
+}
+
+int
+_nbd_clear_meta_contexts_wrapper (struct error *err,
+        struct nbd_handle *h)
+{
+#ifdef LIBNBD_HAVE_NBD_CLEAR_META_CONTEXTS
+  int ret;
+
+  ret = nbd_clear_meta_contexts (h);
+  if (ret == -1)
+    save_error (err);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_CLEAR_META_CONTEXTS
+  missing_function (err, "clear_meta_contexts");
   return -1;
 #endif
 }
@@ -1410,6 +1478,25 @@ _nbd_aio_opt_info_wrapper (struct error *err,
 #endif
 }
 
+int
+_nbd_aio_opt_list_meta_context_wrapper (struct error *err,
+        struct nbd_handle *h, nbd_context_callback context_callback,
+        nbd_completion_callback completion_callback)
+{
+#ifdef LIBNBD_HAVE_NBD_AIO_OPT_LIST_META_CONTEXT
+  int ret;
+
+  ret = nbd_aio_opt_list_meta_context (h, context_callback,
+                                       completion_callback);
+  if (ret == -1)
+    save_error (err);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_AIO_OPT_LIST_META_CONTEXT
+  missing_function (err, "aio_opt_list_meta_context");
+  return -1;
+#endif
+}
+
 int64_t
 _nbd_aio_pread_wrapper (struct error *err,
         struct nbd_handle *h, void *buf, size_t count, uint64_t offset,
@@ -1979,6 +2066,19 @@ _nbd_list_callback_wrapper (void *user_data, const char *name,
 
 void
 _nbd_list_callback_free (void *user_data)
+{
+  extern void freeCallbackId (long);
+  freeCallbackId ((long)user_data);
+}
+
+int
+_nbd_context_callback_wrapper (void *user_data, const char *name)
+{
+  return context_callback ((long)user_data, name);
+}
+
+void
+_nbd_context_callback_free (void *user_data)
 {
   extern void freeCallbackId (long);
   freeCallbackId ((long)user_data);

@@ -754,6 +754,28 @@ func (h *Libnbd) OptInfo () error {
     return nil
 }
 
+/* OptListMetaContext: request the server to list available meta contexts */
+func (h *Libnbd) OptListMetaContext (context ContextCallback) (uint, error) {
+    if h.h == nil {
+        return 0, closed_handle_error ("opt_list_meta_context")
+    }
+
+    var c_err C.struct_error
+    var c_context C.nbd_context_callback
+    c_context.callback = (*[0]byte)(C._nbd_context_callback_wrapper)
+    c_context.free = (*[0]byte)(C._nbd_context_callback_free)
+    c_context.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (context))))
+
+    ret := C._nbd_opt_list_meta_context_wrapper (&c_err, h.h, c_context)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("opt_list_meta_context", c_err)
+        C.free_error (&c_err)
+        return 0, err
+    }
+    return uint (ret), nil
+}
+
 /* AddMetaContext: ask server to negotiate metadata context */
 func (h *Libnbd) AddMetaContext (name string) error {
     if h.h == nil {
@@ -768,6 +790,63 @@ func (h *Libnbd) AddMetaContext (name string) error {
     runtime.KeepAlive (h.h)
     if ret == -1 {
         err := get_error ("add_meta_context", c_err)
+        C.free_error (&c_err)
+        return err
+    }
+    return nil
+}
+
+/* GetNrMetaContexts: return the current number of requested meta contexts */
+func (h *Libnbd) GetNrMetaContexts () (uint, error) {
+    if h.h == nil {
+        return 0, closed_handle_error ("get_nr_meta_contexts")
+    }
+
+    var c_err C.struct_error
+
+    ret := C._nbd_get_nr_meta_contexts_wrapper (&c_err, h.h)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("get_nr_meta_contexts", c_err)
+        C.free_error (&c_err)
+        return 0, err
+    }
+    return uint (ret), nil
+}
+
+/* GetMetaContext: return the i'th meta context request */
+func (h *Libnbd) GetMetaContext (i int) (*string, error) {
+    if h.h == nil {
+        return nil, closed_handle_error ("get_meta_context")
+    }
+
+    var c_err C.struct_error
+    c_i := C.size_t (i)
+
+    ret := C._nbd_get_meta_context_wrapper (&c_err, h.h, c_i)
+    runtime.KeepAlive (h.h)
+    if ret == nil {
+        err := get_error ("get_meta_context", c_err)
+        C.free_error (&c_err)
+        return nil, err
+    }
+    r := C.GoString (ret)
+    C.free (unsafe.Pointer (ret))
+    return &r, nil
+}
+
+/* ClearMetaContexts: reset the list of requested meta contexts */
+func (h *Libnbd) ClearMetaContexts () error {
+    if h.h == nil {
+        return closed_handle_error ("clear_meta_contexts")
+    }
+
+    var c_err C.struct_error
+
+    ret := C._nbd_clear_meta_contexts_wrapper (&c_err, h.h)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("clear_meta_contexts", c_err)
         C.free_error (&c_err)
         return err
     }
@@ -1844,6 +1923,43 @@ func (h *Libnbd) AioOptInfo (optargs *AioOptInfoOptargs) error {
         return err
     }
     return nil
+}
+
+/* Struct carrying optional arguments for AioOptListMetaContext. */
+type AioOptListMetaContextOptargs struct {
+  /* CompletionCallback field is ignored unless CompletionCallbackSet == true. */
+  CompletionCallbackSet bool
+  CompletionCallback CompletionCallback
+}
+
+/* AioOptListMetaContext: request the server to list available meta contexts */
+func (h *Libnbd) AioOptListMetaContext (context ContextCallback, optargs *AioOptListMetaContextOptargs) (uint, error) {
+    if h.h == nil {
+        return 0, closed_handle_error ("aio_opt_list_meta_context")
+    }
+
+    var c_err C.struct_error
+    var c_context C.nbd_context_callback
+    c_context.callback = (*[0]byte)(C._nbd_context_callback_wrapper)
+    c_context.free = (*[0]byte)(C._nbd_context_callback_free)
+    c_context.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (context))))
+    var c_completion C.nbd_completion_callback
+    if optargs != nil {
+        if optargs.CompletionCallbackSet {
+            c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
+            c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
+            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+        }
+    }
+
+    ret := C._nbd_aio_opt_list_meta_context_wrapper (&c_err, h.h, c_context, c_completion)
+    runtime.KeepAlive (h.h)
+    if ret == -1 {
+        err := get_error ("aio_opt_list_meta_context", c_err)
+        C.free_error (&c_err)
+        return 0, err
+    }
+    return uint (ret), nil
 }
 
 /* Struct carrying optional arguments for AioPread. */

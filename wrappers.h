@@ -137,8 +137,16 @@ int _nbd_opt_list_wrapper (struct error *err,
         struct nbd_handle *h, nbd_list_callback list_callback);
 int _nbd_opt_info_wrapper (struct error *err,
         struct nbd_handle *h);
+int _nbd_opt_list_meta_context_wrapper (struct error *err,
+        struct nbd_handle *h, nbd_context_callback context_callback);
 int _nbd_add_meta_context_wrapper (struct error *err,
         struct nbd_handle *h, const char *name);
+ssize_t _nbd_get_nr_meta_contexts_wrapper (struct error *err,
+        struct nbd_handle *h);
+char * _nbd_get_meta_context_wrapper (struct error *err,
+        struct nbd_handle *h, size_t i);
+int _nbd_clear_meta_contexts_wrapper (struct error *err,
+        struct nbd_handle *h);
 int _nbd_set_uri_allow_transports_wrapper (struct error *err,
         struct nbd_handle *h, uint32_t mask);
 int _nbd_set_uri_allow_tls_wrapper (struct error *err,
@@ -240,6 +248,9 @@ int _nbd_aio_opt_list_wrapper (struct error *err,
         nbd_completion_callback completion_callback);
 int _nbd_aio_opt_info_wrapper (struct error *err,
         struct nbd_handle *h, nbd_completion_callback completion_callback);
+int _nbd_aio_opt_list_meta_context_wrapper (struct error *err,
+        struct nbd_handle *h, nbd_context_callback context_callback,
+        nbd_completion_callback completion_callback);
 int64_t _nbd_aio_pread_wrapper (struct error *err,
         struct nbd_handle *h, void *buf, size_t count, uint64_t offset,
         nbd_completion_callback completion_callback, uint32_t flags);
@@ -340,5 +351,10 @@ extern int list_callback ();
 int _nbd_list_callback_wrapper (void *user_data, const char *name,
                                 const char *description);
 void _nbd_list_callback_free (void *user_data);
+
+extern int context_callback ();
+
+int _nbd_context_callback_wrapper (void *user_data, const char *name);
+void _nbd_context_callback_free (void *user_data);
 
 #endif /* LIBNBD_GOLANG_WRAPPERS_H */
