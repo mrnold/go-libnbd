@@ -31,7 +31,7 @@ jobs:
           for release in ${RELEASES}
           do
             release=${release%?}
-            TARBALLS=$(curl --silent https://download.libguestfs.org/libnbd/$release/ | xmllint --html --noblanks --xpath "/html/body/table/tr/td[contains(a/@href, '.tar.gz') and not(contains(a/@href, '.tar.gz.sig'))]/a/@href" -)
+            TARBALLS=$(curl --silent https://download.libguestfs.org/libnbd/$release/ | xmllint --html --noblanks --xpath "/html/body/table/tr/td[contains(a/@href, '.tar.gz') and not(contains(a/@href, '.tar.gz.sig'))]/a/@href" -) || true
             for tarball in ${TARBALLS}
             do
               IFS=\"$IFS read href tarball suffix <<< $tarball # Intentionally overwrite tarball
