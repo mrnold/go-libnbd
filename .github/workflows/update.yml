@@ -42,6 +42,7 @@ jobs:
                 echo
                 continue
               fi
+              latestrelease=$release
               version=$major.$minor.$build
               tag=v$major.$minor.$build
               echo Branch: $release Tar: $tarball Tag: $tag
@@ -94,13 +95,13 @@ jobs:
             done
           done
           
-          latest=$(tail -n 1 <<< $release)
+          latest=$(tail -n 1 <<< $latestrelease)
           git checkout main
-          if git rev-parse --verify $release
+          if git rev-parse --verify $latestrelease
           then
             echo Copy newest bindings from local $latest
             git checkout $latest ./ 
-          elif git rev-parse --verify origin/$release
+          elif git rev-parse --verify origin/$latestrelease
           then    
             echo Copy newest bindings from remote $latest
             git checkout origin/$latest ./
