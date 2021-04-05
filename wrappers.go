@@ -135,6 +135,34 @@ _nbd_get_handle_name_wrapper (struct error *err,
 #endif
 }
 
+uintptr_t
+_nbd_set_private_data_wrapper (struct error *err,
+        struct nbd_handle *h, uintptr_t private_data)
+{
+#ifdef LIBNBD_HAVE_NBD_SET_PRIVATE_DATA
+  uintptr_t ret;
+
+  ret = nbd_set_private_data (h, private_data);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_SET_PRIVATE_DATA
+  missing_function (err, "set_private_data");
+#endif
+}
+
+uintptr_t
+_nbd_get_private_data_wrapper (struct error *err,
+        struct nbd_handle *h)
+{
+#ifdef LIBNBD_HAVE_NBD_GET_PRIVATE_DATA
+  uintptr_t ret;
+
+  ret = nbd_get_private_data (h);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_GET_PRIVATE_DATA
+  missing_function (err, "get_private_data");
+#endif
+}
+
 int
 _nbd_set_export_name_wrapper (struct error *err,
         struct nbd_handle *h, const char *export_name)

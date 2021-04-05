@@ -81,6 +81,10 @@ int _nbd_set_handle_name_wrapper (struct error *err,
         struct nbd_handle *h, const char *handle_name);
 char * _nbd_get_handle_name_wrapper (struct error *err,
         struct nbd_handle *h);
+uintptr_t _nbd_set_private_data_wrapper (struct error *err,
+        struct nbd_handle *h, uintptr_t private_data);
+uintptr_t _nbd_get_private_data_wrapper (struct error *err,
+        struct nbd_handle *h);
 int _nbd_set_export_name_wrapper (struct error *err,
         struct nbd_handle *h, const char *export_name);
 char * _nbd_get_export_name_wrapper (struct error *err,

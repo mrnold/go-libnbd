@@ -232,6 +232,33 @@ func (h *Libnbd) GetHandleName () (*string, error) {
     return &r, nil
 }
 
+/* SetPrivateData: set the per-handle private data */
+func (h *Libnbd) SetPrivateData (private_data uint) (uint, error) {
+    if h.h == nil {
+        return 0, closed_handle_error ("set_private_data")
+    }
+
+    var c_err C.struct_error
+    c_private_data := C.uintptr_t (private_data)
+
+    ret := C._nbd_set_private_data_wrapper (&c_err, h.h, c_private_data)
+    runtime.KeepAlive (h.h)
+    return uint (ret), nil
+}
+
+/* GetPrivateData: get the per-handle private data */
+func (h *Libnbd) GetPrivateData () (uint, error) {
+    if h.h == nil {
+        return 0, closed_handle_error ("get_private_data")
+    }
+
+    var c_err C.struct_error
+
+    ret := C._nbd_get_private_data_wrapper (&c_err, h.h)
+    runtime.KeepAlive (h.h)
+    return uint (ret), nil
+}
+
 /* SetExportName: set the export name */
 func (h *Libnbd) SetExportName (export_name string) error {
     if h.h == nil {
