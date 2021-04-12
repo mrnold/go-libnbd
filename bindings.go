@@ -2738,3 +2738,23 @@ func (h *Libnbd) SupportsUri () (bool, error) {
     if r != 0 { return true, nil } else { return false, nil }
 }
 
+/* GetUri: construct an NBD URI for a connection */
+func (h *Libnbd) GetUri () (*string, error) {
+    if h.h == nil {
+        return nil, closed_handle_error ("get_uri")
+    }
+
+    var c_err C.struct_error
+
+    ret := C._nbd_get_uri_wrapper (&c_err, h.h)
+    runtime.KeepAlive (h.h)
+    if ret == nil {
+        err := get_error ("get_uri", c_err)
+        C.free_error (&c_err)
+        return nil, err
+    }
+    r := C.GoString (ret)
+    C.free (unsafe.Pointer (ret))
+    return &r, nil
+}
+

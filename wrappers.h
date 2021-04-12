@@ -324,6 +324,8 @@ int _nbd_supports_tls_wrapper (struct error *err,
         struct nbd_handle *h);
 int _nbd_supports_uri_wrapper (struct error *err,
         struct nbd_handle *h);
+char * _nbd_get_uri_wrapper (struct error *err,
+        struct nbd_handle *h);
 
 extern int chunk_callback ();
 
