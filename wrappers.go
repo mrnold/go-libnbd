@@ -2028,6 +2028,23 @@ _nbd_supports_uri_wrapper (struct error *err,
 #endif
 }
 
+char *
+_nbd_get_uri_wrapper (struct error *err,
+        struct nbd_handle *h)
+{
+#ifdef LIBNBD_HAVE_NBD_GET_URI
+  char * ret;
+
+  ret = nbd_get_uri (h);
+  if (ret == NULL)
+    save_error (err);
+  return ret;
+#else // !LIBNBD_HAVE_NBD_GET_URI
+  missing_function (err, "get_uri");
+  return NULL;
+#endif
+}
+
 int
 _nbd_chunk_callback_wrapper (void *user_data, const void *subbuf,
                              size_t count, uint64_t offset, unsigned status,
