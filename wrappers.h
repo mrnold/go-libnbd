@@ -25,15 +25,23 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 
 #include "libnbd.h"
 
-/* When calling callbacks we pass the callback ID (an int) in
- * the void *user_data field.  I couldn't work out how to do
- * this in golang, so this helper function does the cast.
+/* When calling callbacks we pass the callback ID (a golang int /
+ * C.long) in the void *user_data field.  We need to create a block
+ * to store the callback number.  This must be freed by C.free(vp)
  */
-static inline void *long_to_vp (long i) { return (void *)(intptr_t)i; }
+static inline void *
+alloc_cbid (long i)
+{
+  long *p = malloc (sizeof (long));
+  assert (p != NULL);
+  *p = i;
+  return p;
+}
 
 /* save_error is called from the same thread to make a copy
  * of the error which can later be retrieve from golang code

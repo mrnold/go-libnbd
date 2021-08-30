@@ -162,7 +162,8 @@ func (h *Libnbd) SetDebugCallback (debug DebugCallback) error {
     var c_debug C.nbd_debug_callback
     c_debug.callback = (*[0]byte)(C._nbd_debug_callback_wrapper)
     c_debug.free = (*[0]byte)(C._nbd_debug_callback_free)
-    c_debug.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (debug))))
+    debug_cbid := registerCallbackId(debug)
+    c_debug.user_data = C.alloc_cbid(C.long(debug_cbid))
 
     ret := C._nbd_set_debug_callback_wrapper (&c_err, h.h, c_debug)
     runtime.KeepAlive (h.h)
@@ -751,7 +752,8 @@ func (h *Libnbd) OptList (list ListCallback) (uint, error) {
     var c_list C.nbd_list_callback
     c_list.callback = (*[0]byte)(C._nbd_list_callback_wrapper)
     c_list.free = (*[0]byte)(C._nbd_list_callback_free)
-    c_list.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (list))))
+    list_cbid := registerCallbackId(list)
+    c_list.user_data = C.alloc_cbid(C.long(list_cbid))
 
     ret := C._nbd_opt_list_wrapper (&c_err, h.h, c_list)
     runtime.KeepAlive (h.h)
@@ -791,7 +793,8 @@ func (h *Libnbd) OptListMetaContext (context ContextCallback) (uint, error) {
     var c_context C.nbd_context_callback
     c_context.callback = (*[0]byte)(C._nbd_context_callback_wrapper)
     c_context.free = (*[0]byte)(C._nbd_context_callback_free)
-    c_context.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (context))))
+    context_cbid := registerCallbackId(context)
+    c_context.user_data = C.alloc_cbid(C.long(context_cbid))
 
     ret := C._nbd_opt_list_meta_context_wrapper (&c_err, h.h, c_context)
     runtime.KeepAlive (h.h)
@@ -1400,7 +1403,8 @@ func (h *Libnbd) PreadStructured (buf []byte, offset uint64, chunk ChunkCallback
     var c_chunk C.nbd_chunk_callback
     c_chunk.callback = (*[0]byte)(C._nbd_chunk_callback_wrapper)
     c_chunk.free = (*[0]byte)(C._nbd_chunk_callback_free)
-    c_chunk.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (chunk))))
+    chunk_cbid := registerCallbackId(chunk)
+    c_chunk.user_data = C.alloc_cbid(C.long(chunk_cbid))
     var c_flags C.uint32_t
     if optargs != nil {
         if optargs.FlagsSet {
@@ -1632,7 +1636,8 @@ func (h *Libnbd) BlockStatus (count uint64, offset uint64, extent ExtentCallback
     var c_extent C.nbd_extent_callback
     c_extent.callback = (*[0]byte)(C._nbd_extent_callback_wrapper)
     c_extent.free = (*[0]byte)(C._nbd_extent_callback_free)
-    c_extent.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (extent))))
+    extent_cbid := registerCallbackId(extent)
+    c_extent.user_data = C.alloc_cbid(C.long(extent_cbid))
     var c_flags C.uint32_t
     if optargs != nil {
         if optargs.FlagsSet {
@@ -1850,7 +1855,8 @@ func (h *Libnbd) AioOptGo (optargs *AioOptGoOptargs) error {
         if optargs.CompletionCallbackSet {
             c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
             c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
-            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+            completion_cbid := registerCallbackId(optargs.CompletionCallback)
+            c_completion.user_data = C.alloc_cbid(C.long(completion_cbid))
         }
     }
 
@@ -1899,13 +1905,15 @@ func (h *Libnbd) AioOptList (list ListCallback, optargs *AioOptListOptargs) erro
     var c_list C.nbd_list_callback
     c_list.callback = (*[0]byte)(C._nbd_list_callback_wrapper)
     c_list.free = (*[0]byte)(C._nbd_list_callback_free)
-    c_list.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (list))))
+    list_cbid := registerCallbackId(list)
+    c_list.user_data = C.alloc_cbid(C.long(list_cbid))
     var c_completion C.nbd_completion_callback
     if optargs != nil {
         if optargs.CompletionCallbackSet {
             c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
             c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
-            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+            completion_cbid := registerCallbackId(optargs.CompletionCallback)
+            c_completion.user_data = C.alloc_cbid(C.long(completion_cbid))
         }
     }
 
@@ -1938,7 +1946,8 @@ func (h *Libnbd) AioOptInfo (optargs *AioOptInfoOptargs) error {
         if optargs.CompletionCallbackSet {
             c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
             c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
-            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+            completion_cbid := registerCallbackId(optargs.CompletionCallback)
+            c_completion.user_data = C.alloc_cbid(C.long(completion_cbid))
         }
     }
 
@@ -1969,13 +1978,15 @@ func (h *Libnbd) AioOptListMetaContext (context ContextCallback, optargs *AioOpt
     var c_context C.nbd_context_callback
     c_context.callback = (*[0]byte)(C._nbd_context_callback_wrapper)
     c_context.free = (*[0]byte)(C._nbd_context_callback_free)
-    c_context.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (context))))
+    context_cbid := registerCallbackId(context)
+    c_context.user_data = C.alloc_cbid(C.long(context_cbid))
     var c_completion C.nbd_completion_callback
     if optargs != nil {
         if optargs.CompletionCallbackSet {
             c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
             c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
-            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+            completion_cbid := registerCallbackId(optargs.CompletionCallback)
+            c_completion.user_data = C.alloc_cbid(C.long(completion_cbid))
         }
     }
 
@@ -2015,7 +2026,8 @@ func (h *Libnbd) AioPread (buf AioBuffer, offset uint64, optargs *AioPreadOptarg
         if optargs.CompletionCallbackSet {
             c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
             c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
-            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+            completion_cbid := registerCallbackId(optargs.CompletionCallback)
+            c_completion.user_data = C.alloc_cbid(C.long(completion_cbid))
         }
         if optargs.FlagsSet {
             c_flags = C.uint32_t (optargs.Flags)
@@ -2055,14 +2067,16 @@ func (h *Libnbd) AioPreadStructured (buf AioBuffer, offset uint64, chunk ChunkCa
     var c_chunk C.nbd_chunk_callback
     c_chunk.callback = (*[0]byte)(C._nbd_chunk_callback_wrapper)
     c_chunk.free = (*[0]byte)(C._nbd_chunk_callback_free)
-    c_chunk.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (chunk))))
+    chunk_cbid := registerCallbackId(chunk)
+    c_chunk.user_data = C.alloc_cbid(C.long(chunk_cbid))
     var c_completion C.nbd_completion_callback
     var c_flags C.uint32_t
     if optargs != nil {
         if optargs.CompletionCallbackSet {
             c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
             c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
-            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+            completion_cbid := registerCallbackId(optargs.CompletionCallback)
+            c_completion.user_data = C.alloc_cbid(C.long(completion_cbid))
         }
         if optargs.FlagsSet {
             c_flags = C.uint32_t (optargs.Flags)
@@ -2105,7 +2119,8 @@ func (h *Libnbd) AioPwrite (buf AioBuffer, offset uint64, optargs *AioPwriteOpta
         if optargs.CompletionCallbackSet {
             c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
             c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
-            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+            completion_cbid := registerCallbackId(optargs.CompletionCallback)
+            c_completion.user_data = C.alloc_cbid(C.long(completion_cbid))
         }
         if optargs.FlagsSet {
             c_flags = C.uint32_t (optargs.Flags)
@@ -2176,7 +2191,8 @@ func (h *Libnbd) AioFlush (optargs *AioFlushOptargs) (uint64, error) {
         if optargs.CompletionCallbackSet {
             c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
             c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
-            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+            completion_cbid := registerCallbackId(optargs.CompletionCallback)
+            c_completion.user_data = C.alloc_cbid(C.long(completion_cbid))
         }
         if optargs.FlagsSet {
             c_flags = C.uint32_t (optargs.Flags)
@@ -2218,7 +2234,8 @@ func (h *Libnbd) AioTrim (count uint64, offset uint64, optargs *AioTrimOptargs) 
         if optargs.CompletionCallbackSet {
             c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
             c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
-            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+            completion_cbid := registerCallbackId(optargs.CompletionCallback)
+            c_completion.user_data = C.alloc_cbid(C.long(completion_cbid))
         }
         if optargs.FlagsSet {
             c_flags = C.uint32_t (optargs.Flags)
@@ -2260,7 +2277,8 @@ func (h *Libnbd) AioCache (count uint64, offset uint64, optargs *AioCacheOptargs
         if optargs.CompletionCallbackSet {
             c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
             c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
-            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+            completion_cbid := registerCallbackId(optargs.CompletionCallback)
+            c_completion.user_data = C.alloc_cbid(C.long(completion_cbid))
         }
         if optargs.FlagsSet {
             c_flags = C.uint32_t (optargs.Flags)
@@ -2302,7 +2320,8 @@ func (h *Libnbd) AioZero (count uint64, offset uint64, optargs *AioZeroOptargs) 
         if optargs.CompletionCallbackSet {
             c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
             c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
-            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+            completion_cbid := registerCallbackId(optargs.CompletionCallback)
+            c_completion.user_data = C.alloc_cbid(C.long(completion_cbid))
         }
         if optargs.FlagsSet {
             c_flags = C.uint32_t (optargs.Flags)
@@ -2341,14 +2360,16 @@ func (h *Libnbd) AioBlockStatus (count uint64, offset uint64, extent ExtentCallb
     var c_extent C.nbd_extent_callback
     c_extent.callback = (*[0]byte)(C._nbd_extent_callback_wrapper)
     c_extent.free = (*[0]byte)(C._nbd_extent_callback_free)
-    c_extent.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (extent))))
+    extent_cbid := registerCallbackId(extent)
+    c_extent.user_data = C.alloc_cbid(C.long(extent_cbid))
     var c_completion C.nbd_completion_callback
     var c_flags C.uint32_t
     if optargs != nil {
         if optargs.CompletionCallbackSet {
             c_completion.callback = (*[0]byte)(C._nbd_completion_callback_wrapper)
             c_completion.free = (*[0]byte)(C._nbd_completion_callback_free)
-            c_completion.user_data = unsafe.Pointer (C.long_to_vp (C.long (registerCallbackId (optargs.CompletionCallback))))
+            completion_cbid := registerCallbackId(optargs.CompletionCallback)
+            c_completion.user_data = C.alloc_cbid(C.long(completion_cbid))
         }
         if optargs.FlagsSet {
             c_flags = C.uint32_t (optargs.Flags)
