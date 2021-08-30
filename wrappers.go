@@ -2056,8 +2056,10 @@ _nbd_chunk_callback_wrapper (void *user_data, const void *subbuf,
 void
 _nbd_chunk_callback_free (void *user_data)
 {
+  long *p = user_data;
   extern void freeCallbackId (long);
-  freeCallbackId ((long)user_data);
+  freeCallbackId (*p);
+  free (p);
 }
 
 int
@@ -2069,8 +2071,10 @@ _nbd_completion_callback_wrapper (void *user_data, int *error)
 void
 _nbd_completion_callback_free (void *user_data)
 {
+  long *p = user_data;
   extern void freeCallbackId (long);
-  freeCallbackId ((long)user_data);
+  freeCallbackId (*p);
+  free (p);
 }
 
 int
@@ -2083,8 +2087,10 @@ _nbd_debug_callback_wrapper (void *user_data, const char *context,
 void
 _nbd_debug_callback_free (void *user_data)
 {
+  long *p = user_data;
   extern void freeCallbackId (long);
-  freeCallbackId ((long)user_data);
+  freeCallbackId (*p);
+  free (p);
 }
 
 int
@@ -2098,8 +2104,10 @@ _nbd_extent_callback_wrapper (void *user_data, const char *metacontext,
 void
 _nbd_extent_callback_free (void *user_data)
 {
+  long *p = user_data;
   extern void freeCallbackId (long);
-  freeCallbackId ((long)user_data);
+  freeCallbackId (*p);
+  free (p);
 }
 
 int
@@ -2112,8 +2120,10 @@ _nbd_list_callback_wrapper (void *user_data, const char *name,
 void
 _nbd_list_callback_free (void *user_data)
 {
+  long *p = user_data;
   extern void freeCallbackId (long);
-  freeCallbackId ((long)user_data);
+  freeCallbackId (*p);
+  free (p);
 }
 
 int
@@ -2125,8 +2135,10 @@ _nbd_context_callback_wrapper (void *user_data, const char *name)
 void
 _nbd_context_callback_free (void *user_data)
 {
+  long *p = user_data;
   extern void freeCallbackId (long);
-  freeCallbackId ((long)user_data);
+  freeCallbackId (*p);
+  free (p);
 }
 
 // There must be no blank line between end comment and import!
